@@ -480,7 +480,9 @@ function mergeStudents(list, opt){ opt = opt || {};
   let add = 0, upd = 0;
   S.students = S.students.filter(x => !x.example);
   list.forEach(n => {
-    const ex = S.students.find(x => norm(x.name) === norm(n.name));
+    const keys = [n.name, ...(n.aliases || [])].map(norm); const ex = S.students.find(x => keys.includes(norm(x.name)));
+    if (ex && n.name && norm(ex.name) !== norm(n.name)) ex.name = n.name;
+    delete n.aliases;
     if (!ex){ S.students.push(n); add++; return; }
     upd++;
     ['dob','sex','phone','goal'].forEach(k => { if (!ex[k] && n[k]) ex[k] = n[k]; });
@@ -527,7 +529,7 @@ const FIG_RULES = [
   [/prancha|plank|isometria|dead ?bug|perdigueiro/i, 'prancha'],
   [/panturrilha|g[eê]meos|calf/i, 'panturrilha']
 ];
-const figFor = e => e.fig === 'none' ? null : (e.fig && FIGS[e.fig] ? e.fig : (FIG_RULES.find(([re]) => re.test(e.nome || '')) || [])[1] || null);
+const figFor = e => null; // bonecos antigos removidos: só animação 3D
 const rad = d => d * Math.PI / 180;
 function figPose(key, ph){
   const F = FIGS[key], k = (1 - Math.cos(ph * Math.PI * 2)) / 2, P = {};
@@ -869,7 +871,7 @@ function fichaView(t, f, fi){
   return `<div class="ficha">
     <div class="ficha-h"><input data-k="${p}nome" value="${esc(f.nome)}" aria-label="Nome do treino"><input data-k="${p}foco" value="${esc(f.foco || '')}" placeholder="Foco (ex.: membros inferiores)" style="font-family:var(--f-body);font-size:14px;font-weight:500" aria-label="Foco">
     <button class="btn sm ghost danger" data-delficha="${fi}">Excluir treino</button></div>
-    <div class="tbl-wrap"><table class="t"><thead><tr><th>Exercício</th><th>Séries</th><th>Reps</th><th>Concêntrica (s)</th><th>Excêntrica (s)</th><th>Descanso (s)</th><th>Vídeo</th><th>Boneco 3D / animado</th><th></th></tr></thead><tbody>
+    <div class="tbl-wrap"><table class="t"><thead><tr><th>Exercício</th><th>Séries</th><th>Reps</th><th>Concêntrica (s)</th><th>Excêntrica (s)</th><th>Descanso (s)</th><th>Vídeo</th><th>Animação 3D</th><th></th></tr></thead><tbody>
     ${(f.ex || []).map((e, ei) => { const q = p + 'ex.' + ei + '.'; return `<tr>
       <td><input data-k="${q}nome" list="exlib" value="${esc(e.nome)}" style="min-width:190px" aria-label="Exercício"></td>
       <td><input data-k="${q}series" value="${esc(e.series)}" style="width:52px" aria-label="Séries"></td>
@@ -878,7 +880,7 @@ function fichaView(t, f, fi){
       <td><input data-k="${q}exc" value="${esc(e.exc || '')}" style="width:56px" aria-label="Excêntrica"></td>
       <td><input data-k="${q}desc" value="${esc(e.desc || '')}" style="width:60px" aria-label="Descanso"></td>
       <td><input data-k="${q}video" value="${esc(e.video)}" placeholder="link do vídeo" style="min-width:140px" aria-label="Vídeo"></td>
-      <td><div class="row" style="flex-wrap:nowrap;gap:4px">${animBox(e, 64, 36)}<input data-anim="${fi}.${ei}" list="anim3dlist" value="${esc(e.anim && e.anim.nome || '')}" placeholder="Animação 3D" style="min-width:150px" aria-label="Animação 3D"></div><div class="row" style="flex-wrap:nowrap;gap:4px;margin-top:4px">${figFor(e) ? `<span data-fig="${figFor(e)}" data-size="40" style="width:40px;height:40px;flex:none"></span>` : ''}<select data-figsel="${fi}.${ei}" aria-label="Boneco" style="min-width:110px"><option value=""${!e.fig ? ' selected' : ''}>Automático</option>${Object.entries(FIGS).map(([k, ff]) => `<option value="${k}"${e.fig === k ? ' selected' : ''}>${ff.label}</option>`).join('')}<option value="none"${e.fig === 'none' ? ' selected' : ''}>Sem boneco</option></select></div></td>
+      <td><div class="row" style="flex-wrap:nowrap;gap:4px">${animBox(e, 64, 36)}<input data-anim="${fi}.${ei}" list="anim3dlist" value="${esc(e.anim && e.anim.nome || '')}" placeholder="Animação 3D" style="min-width:150px" aria-label="Animação 3D"></div></td>
       <td style="white-space:nowrap"><button class="btn sm ghost" data-mv="${fi}.${ei}.-1" aria-label="Subir">↑</button><button class="btn sm ghost" data-mv="${fi}.${ei}.1" aria-label="Descer">↓</button><button class="btn sm ghost danger" data-delex="${fi}.${ei}" aria-label="Remover">✕</button></td></tr>`; }).join('')}
     </tbody></table></div>
     <div style="padding:10px 12px"><button class="btn sm" data-addex="${fi}">+ Exercício</button></div>
@@ -983,16 +985,6 @@ function modalView(){
     </div>
     <h2 style="font-size:19px;margin-top:16px">Logo do PDF</h2>
     <div class="row" style="margin-top:6px"><img src="${S.coach.logo || DEFAULT_LOGO}" alt="Logo atual" style="height:70px;background:#fff;border-radius:6px;padding:4px"><label class="btn sm">Trocar logo<input type="file" id="logo-up" accept="image/*" hidden></label>${S.coach.logo ? '<button class="btn sm ghost" data-act="logo-rm">Voltar à logo Ápice</button>' : ''}</div>
-    <h2 style="font-size:19px;margin-top:16px">Boneco dos exercícios</h2>
-    <p class="small muted">Seu avatar vira o rosto do boneco que demonstra os exercícios para o aluno. Ajuste as cores para combinar com ele.</p>
-    <div class="row" style="margin-top:10px;align-items:flex-start">
-      <div data-fig="agachamento" data-size="120" style="width:120px;height:120px;background:var(--surface-2);border-radius:8px"></div>
-      <div style="display:flex;flex-direction:column;gap:8px;flex:1;min-width:180px">
-        <label class="btn sm">Trocar avatar<input type="file" id="av-up" accept="image/*" hidden></label>
-        ${(S.coach.look || {}).avatar ? '<button class="btn sm ghost" data-act="av-rm">Voltar ao avatar padrão</button>' : ''}
-        <div class="row">${[['skin','Pele','#f2c234'],['hair','Cabelo','#8e8e8e'],['shirt','Camisa','#141812'],['shorts','Short','#2f7d2a'],['shoes','Tênis','#f2f2f2']].map(([k, l, d]) => `<label class="small" style="display:flex;flex-direction:column;align-items:center;gap:2px">${l}<input type="color" data-look="${k}" value="${esc((S.coach.look || {})[k] || d)}" style="width:40px;height:30px;border:0;background:none;padding:0"></label>`).join('')}</div>
-      </div>
-    </div>
     <div class="row" style="margin-top:14px;justify-content:flex-end"><button class="btn pri" data-act="close-modal">Pronto</button></div></div></div>`;
   if (V.modal === 'backup') return `<div class="modal-bg" data-act="close-modal"><div class="modal" data-stop>
     <h2>Backup</h2><p class="small">Os dados ficam salvos neste navegador, neste aparelho. Baixe um backup com frequência e guarde no computador ou na nuvem. Para usar em outro aparelho, abra o app lá e carregue o backup.</p>
