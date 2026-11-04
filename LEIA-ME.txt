@@ -1,0 +1,19 @@
+APP ÁPICE — INSTALAÇÃO NO GITHUB (grátis)
+
+1. Crie a conta em https://github.com (gratuita).
+2. Crie o repositório do SITE: botão "New" > nome: apice > Public > marque "Add a README file" > Create repository.
+3. Dentro dele: "Add file" > "Upload files" > arraste TODOS os arquivos desta pasta (index.html, sw.js, manifest.webmanifest, os 3 ícones .png e a pasta alunos) > "Commit changes".
+4. Ainda no repositório apice: Settings > Pages > Source: "Deploy from a branch" > Branch: main / (root) > Save.
+   Em 1–2 minutos o app fica em: https://SEU-USUARIO.github.io/apice/
+5. Crie o repositório dos DADOS: "New" > nome: apice-dados > PRIVATE > marque "Add a README file" > Create repository.
+6. Crie o token: foto do perfil > Settings > Developer settings > Personal access tokens > Fine-grained tokens > Generate new token
+   - Nome: Ápice · Expiração: a maior possível
+   - Repository access: "Only select repositories" > escolha apice e apice-dados
+   - Permissions > Repository permissions > Contents: "Read and write"
+   - Generate token > copie o código (começa com github_pat_). Guarde como uma senha.
+7. No Mac: abra https://SEU-USUARIO.github.io/apice/ no Safari (Arquivo > Adicionar ao Dock) ou no Chrome (ícone de instalar na barra de endereço).
+   Toque em "☁ Configurar nuvem", preencha usuário, apice, apice-dados e o token > Salvar e sincronizar.
+8. No iPhone: abra o mesmo endereço no Safari > Compartilhar > "Adicionar à Tela de Início". Abra pelo ícone e configure a nuvem com o mesmo token.
+9. Para trazer os alunos que você já cadastrou na versão do Claude: lá, Backup > Baixar backup. No app novo, Backup > Carregar backup.
+
+Atualizações do app: quando eu mandar uma versão nova, faça de novo o passo 3 com os arquivos novos (substituir).
